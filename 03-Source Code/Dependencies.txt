@@ -1,0 +1,2 @@
+1- pip install scenedetect => for splitting video into scenes 
+reference: https://pyscenedetect.readthedocs.io/en/latest/features/
