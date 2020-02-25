@@ -20,10 +20,10 @@ def FrameCapture(path):
         success, image = vidObj.read()
 
         #comment this line for colorized images
-        image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        #image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
         # Saves the frames with frame-count
-        cv2.imwrite(r"Test Video\\Segmented Frames GRAYSCALE\\frame%d.jpg" % count, image)
+        cv2.imwrite(r"Test Video\\ReSegemented\\frame%d.jpg" % count, image)
     #### WILL GIVE UNKNOWN ERROR BUT OUTPUTS CORRECTLY DONT WASTE UR TIME
         count += 1
 
@@ -31,4 +31,4 @@ def FrameCapture(path):
 # Driver Code
 if __name__ == '__main__':
     # Calling the function
-    FrameCapture("C:\\Users\\Mohamed Haitham\\Documents\\GitHub\\Color-IT\\Test Video\\gettyimages-157972808-640_adpp (2).mp4")
+    FrameCapture("C:\\Users\\Mohamed Haitham\\Documents\\GitHub\\Color-IT\\Test Video\\Video After Grayscale Conversion.avi")
