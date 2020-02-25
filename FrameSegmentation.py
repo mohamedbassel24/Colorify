@@ -19,9 +19,12 @@ def FrameCapture(path):
         # function extract frames
         success, image = vidObj.read()
 
-        # Saves the frames with frame-count
-        cv2.imwrite("Test Video\\Segmented Frames\\frame%d.jpg" % count, image)
+        #comment this line for colorized images
+        image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
+        # Saves the frames with frame-count
+        cv2.imwrite(r"Test Video\\Segmented Frames GRAYSCALE\\frame%d.jpg" % count, image)
+    #### WILL GIVE UNKNOWN ERROR BUT OUTPUTS CORRECTLY DONT WASTE UR TIME
         count += 1
 
 
