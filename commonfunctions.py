@@ -1,9 +1,7 @@
 import cv2
 import glob
-from skimage.morphology import binary_erosion, binary_dilation, binary_closing, skeletonize, thin
 import skimage.io as io
 import matplotlib.pyplot as plt
-import numpy as np
 from skimage.exposure import histogram
 from matplotlib.pyplot import bar
 from skimage.color import rgb2gray, rgb2hsv
@@ -13,7 +11,6 @@ from scipy.signal import convolve2d
 from scipy import fftpack
 import math
 
-from skimage.util import random_noise
 from skimage.filters import median
 from skimage.feature import canny
 
@@ -25,7 +22,6 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
 # Edges
-from skimage.filters import sobel_h, sobel, sobel_v, roberts, prewitt
 
 #Learning Models
 from imutils.video import VideoStream

@@ -22,7 +22,7 @@ def colorization(frame, net):
     # resize the input frame, scale the pixel intensities to the
     # range [0, 1], and then convert the frame from the BGR to Lab
     # color space
-    #frame = imutils.resize(frame, width=args["width"])
+    # frame = imutils.resize(frame, width=args["width"])
     scaled = frame.astype("float32") / 255.0
     lab = cv2.cvtColor(scaled, cv2.COLOR_BGR2LAB)
 
@@ -52,7 +52,5 @@ def colorization(frame, net):
     colorized = cv2.cvtColor(colorized, cv2.COLOR_LAB2BGR)
     colorized = np.clip(colorized, 0, 1)
     colorized = (255 * colorized).astype("uint8")
+    colorized = cv2.cvtColor(colorized, cv2.COLOR_BGR2RGB)
     return colorized
-
-
-
