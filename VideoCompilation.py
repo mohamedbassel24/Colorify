@@ -12,10 +12,10 @@ def sorted_nicely( l ):
     return sorted(l, key = alphanum_key)
 
 #print(glob.glob('Test Video\\Segmented Frames GRAYSCALE\\*.jpg'))
-FileArray=glob.glob('Test Video\\Segmented Frames GRAYSCALE\\*.jpg')
+FileArray=glob.glob('Test Video\\segmentedcolorized BALLOONS\\*.jpg')
 FileArraySorted=sorted_nicely(FileArray)
 
-#print(FileArraySorted)
+print(FileArraySorted)
 
 img_array = []
 
@@ -25,7 +25,7 @@ for filename in FileArraySorted:
     size = (width, height)
     img_array.append(img)
 
-out = cv2.VideoWriter('Test Video\\Video After Grayscale Conversion.avi',cv2.VideoWriter_fourcc(*'DIVX'), 30, size)
+out = cv2.VideoWriter('Test Video\\BALLOONSColorized.mp4',cv2.VideoWriter_fourcc(*'H264'), 30, size)
 
 for i in range(len(img_array)):
     out.write(img_array[i])
