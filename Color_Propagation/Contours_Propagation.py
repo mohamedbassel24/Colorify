@@ -1,26 +1,23 @@
 from commonfunctions import *
 from skimage import io, color
+from scipy import stats
 
 
-# Color propagation
-# Method-1: Segmentation
-# Method-2: Style Transfer
-# Method-3: local and global propagation optical flow
 def getContourCenter(cnt):
     """get Center of specific contour"""
     c = max(cnt, key=cv2.contourArea)
-    M = cv2.moments(c)
+    M = cv2.moments(cnt)
     if M["m00"] != 0:
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        print("wee")
+
     else:
         cX, cY = 0, 0
     return [cX, cY]
 
 
 def getContourAverage(img, cnt):
-    _, pnts = getContourPoints(img, cnt)
+    pnts = getContourPoints(img, cnt)
     """get Center of specific contour"""
     x = 0
     y = 0
@@ -36,11 +33,20 @@ def getContourPoints(img, cnt):
     mask = np.zeros(img.shape, dtype="uint8")
     mask = cv2.drawContours(mask, [cnt], 0, color=255, thickness=-1)  # create a mask for a points belong to contour
     pnts = np.where(mask == 255)
-    ListPoint = []
-    for i in range(len(pnts[0])):
-        ListPoint.append([pnts[0][i], pnts[1][i]])
+    pnts = list(pnts)
+    pnts[0] = list(pnts[0])
+    pnts[1] = list(pnts[1])
+    return pnts
 
-    return ListPoint, pnts
+
+def get_mode(img):
+    unq, count = np.unique(img.reshape(-1, img.shape[-1]), axis=0, return_counts=True)
+    return unq[count.argmax()]
+
+
+def get_modeArr(Arr):
+    mode_info = stats.mode(Arr)
+    return mode_info[0]
 
 
 def ContourPropagation(gk, gk_prev, ik_pre):
@@ -59,6 +65,8 @@ def ContourPropagation(gk, gk_prev, ik_pre):
     _, gk = cv2.threshold(gk, 100, 255, cv2.THRESH_BINARY)
     _, gk_prev = cv2.threshold(gk_prev, 100, 255, cv2.THRESH_BINARY)
 
+    # TODO:MOrplogical operation here
+
     # Get Image Contours
     contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
     contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
@@ -71,81 +79,57 @@ def ContourPropagation(gk, gk_prev, ik_pre):
         MinDis = 100
         IndexToRemove = 0
         for cnt_Index in range(len(contours_gk_pre)):
-            ret = cv2.matchShapes(cnt_Gk, contours_gk_pre[cnt_Index], 1, 0.0)  # get the probability of matching
+            matchingRatio = cv2.matchShapes(cnt_Gk, contours_gk_pre[cnt_Index], 1,
+                                            0.0)  # get the probability of matching
             center_match = getContourAverage(gk_prev, contours_gk_pre[cnt_Index])  # get center of cnt
             # get distance between 2 contour centers
             D2Center = np.sqrt(
                 (int(center_cntGK[0]) - int(center_match[0])) ** 2 + (int(center_cntGK[1]) - int(center_match[1])) ** 2)
-            if ret < 0.1 and D2Center < MinDis:
+            if matchingRatio < 0.01:
                 MinDis = D2Center  # get the minimum distance
                 IndexToRemove = cnt_Index
                 MatchedGkPre = contours_gk_pre[cnt_Index]
+                break
         # remove the last pick from list
         if len(contours_gk_pre) != 0:
             contours_gk_pre.pop(IndexToRemove)
 
-        # if probability is close to 1 after looping => this is a new object => ignore it
-
         # GET  the points of the contour
-        gk_pnts_list, gk_pt = getContourPoints(gk, cnt_Gk)
-        gk_pre_pnts_list, gk_pre_pts = getContourPoints(gk_prev, MatchedGkPre)
+        gk_pointsCnt = getContourPoints(gk, cnt_Gk)
+        gk_pre_pointsCnt = getContourPoints(gk_prev, MatchedGkPre)
 
         [cX, cY] = getContourAverage(gk_prev, MatchedGkPre)
         # casting from nparray to list
-        gk_pre_pts = list(gk_pre_pts)
-        gk_pre_pts[0] = list(gk_pre_pts[0])
-        gk_pre_pts[1] = list(gk_pre_pts[1])
+        NewPoints = []
+        # getting the pixels that are outer of the matched contour
+        Mask_a = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # pixels of the contour
+        Mask_b = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]
+        mode_a = get_modeArr(Mask_a)  # mode of channel a
+        mode_b = get_modeArr(Mask_b)  # mode of channel b
 
         # Resizing the 2 list points
-        if len(gk_pnts_list) < len(gk_pre_pnts_list):
-            gk_pre_pts = list(gk_pre_pts)
-            gk_pre_pts[0] = gk_pre_pts[0][:len(gk_pt[0])]
-            gk_pre_pts[1] = gk_pre_pts[1][:len(gk_pt[1])]
-            gk_pre_pnts_list = gk_pre_pnts_list[:len(gk_pnts_list)]
-        elif len(gk_pnts_list) > len(gk_pre_pnts_list):
-            for i in range(len(gk_pnts_list) - len(gk_pre_pnts_list)):
-                gk_pre_pnts_list.append([cX, cY])
-                gk_pre_pts[0].append(cX)
-                gk_pre_pts[1].append(cY)
+        print(len(gk_pointsCnt[0]), len(gk_pre_pointsCnt[0]))
+        if len(gk_pointsCnt[0]) < len(gk_pre_pointsCnt[0]):
+            gk_pre_pointsCnt[0] = gk_pre_pointsCnt[0][:len(gk_pointsCnt[0])]
+            gk_pre_pointsCnt[1] = gk_pre_pointsCnt[1][:len(gk_pointsCnt[1])]
+        elif len(gk_pointsCnt[0]) > len(gk_pre_pointsCnt[0]):
+            NewPoints = [gk_pointsCnt[0][len(gk_pre_pointsCnt[0]):], gk_pointsCnt[1][len(gk_pre_pointsCnt[0]):]]
+            gk_pointsCnt[0] = gk_pointsCnt[0][:len(gk_pre_pointsCnt[0])]
+            gk_pointsCnt[1] = gk_pointsCnt[1][:len(gk_pre_pointsCnt[1])]
 
-        if len(gk_pt[0]) > 1:
-            ik[gk_pt[0], gk_pt[1], 1] = ik_pre[gk_pre_pts[0], gk_pre_pts[1], 1]  # a channel
-            ik[gk_pt[0], gk_pt[1], 2] = ik_pre[gk_pre_pts[0], gk_pre_pts[1], 2]  # b channel
-          #  ik[gk_pt[0], gk_pt[1], 1] = ik_pre[gk_pt[0], gk_pt[1], 1]  # a channel
-           # ik[gk_pt[0], gk_pt[1], 2] = ik_pre[gk_pt[0], gk_pt[1], 2]  # b channel
+        # Shifting the colors from previous to current
+        if len(gk_pointsCnt[0]) > 1:
+            ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # a channel
+            ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
 
-            # gk_pre_pts[0] = np.vstack((gk_pre_pts[0], cX))
-            # gk_pre_pts[1] = np.vstack((gk_pre_pts[0], cY))
-            # TrueIndex = []
-            # FalseIndex = []
-            # TrueIndex = (gk_pt[0] == gk_pre_pts[0]) & (gk_pt[1] == gk_pre_pts[1])
-            # FalseIndex = (gk_pt[0] != gk_pre_pts[0]) | (gk_pt[1] != gk_pre_pts[1])
-            # Value=ik[gk_pt[0][5], gk_pt[1][5], 2]
-        #    ik[gk_pt[0][FalseIndex], gk_pt[1][FalseIndex], 1] = ik_pre[cX, cY, 1]
-        #   ik[gk_pt[0][FalseIndex], gk_pt[1][FalseIndex], 2] = ik_pre[cX, cY, 2]
-        # for p in range(len(gk_pt[0])):
-        #   found = False
-        #  for check in range(len(gk_pre_pts[0])):
-
-        #     if gk_pt[0][p] == gk_pre_pts[0][check] and gk_pt[1][p] == gk_pre_pts[1][check]:
-        #        ik[gk_pt[0][p], gk_pt[1][p], 1] = ik_pre[gk_pt[0][p], gk_pt[1][p], 1]
-        #       ik[gk_pt[0][p], gk_pt[1][p], 2] = ik_pre[gk_pt[0][p], gk_pt[1][p], 2]
-        #      found = True
-        #     break
-        # if not found:
-        #    ik[gk_pt[p][0], gk_pt[p][1], 1] = ik_pre[cX, cY, 1]
-        #   ik[gk_pt[p][0], gk_pt[p][1], 2] = ik_pre[cX, cY, 2]
-
-        # for i in range(len(gk_pnts_list)):
-        #   ik[gk_pnts_list[i][0], gk_pnts_list[i][1], 1] = ik_pre[gk_pre_pnts_list[i][0], gk_pre_pnts_list[i][1], 1]  # a channel
-        #  ik[gk_pnts_list[i][0], gk_pnts_list[i][1], 2] = ik_pre[gk_pre_pnts_list[i][0], gk_pre_pnts_list[i][1], 2]  # b channel
-        # ik[X, Y, 1] = ik_pre[cX, cY, 1]
-        # ik[X, Y, 2] = ik_pre[cX, cY, 2]
+        if len(NewPoints) > 1:
+            ik[NewPoints[:][0], NewPoints[:][1], 1] = mode_a  # a channel
+            ik[NewPoints[:][0], NewPoints[:][1], 2] = mode_b  # b channel
     # Convert to RGB color model
 
     ik = color.lab2rgb(ik)
     ik = (ik * 255).astype("uint8")
 
     # Use a median filter to overcome some grayscale pixels
-    # ik = cv2.bilateralFilter(ik, 100, 1, 100)
+    # ik = cv2.bilateralFilter(ik, 300, 20, 100)
     return ik

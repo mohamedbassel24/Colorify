@@ -8,11 +8,14 @@ def getVideoFrames(FileName):
     # vs = VideoStream(src=0).start() if camera mode
     cap = cv.VideoCapture(FileName)
     hasFrame, frame = cap.read()
+    frame = cv2.resize(frame, (720, 720))
     VideoFrames = []
     while hasFrame:
         # show_images([frame])
         VideoFrames.append(np.copy(frame))
         hasFrame, frame = cap.read()
+        #if hasFrame:
+           # frame = cv2.resize(frame, (100, 100))
     print("[INFO] video stream...done")
     return VideoFrames
 
@@ -21,6 +24,7 @@ def WriteFrames(FileName, image):
     """This function return all the video or clip frames """
     filename = 'Output/Frame#' + str(FileName) + '.png'
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+   # image = cv2.resize(image, (720, 1024))
     cv2.imwrite(filename, image)
     print("[INFO] Frame" + str(FileName) + " has been written...done")
 

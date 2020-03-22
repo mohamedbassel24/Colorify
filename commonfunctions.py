@@ -10,7 +10,7 @@ from skimage.filters import threshold_otsu
 from scipy.signal import convolve2d
 from scipy import fftpack
 import math
-
+from scipy import stats
 from skimage.filters import median
 from skimage.feature import canny
 
