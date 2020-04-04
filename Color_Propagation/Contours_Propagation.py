@@ -62,8 +62,8 @@ def ContourPropagation(gk, gk_prev, ik_pre):
 
     gk = (rgb2gray(gk) * 255).astype("uint8")
     gk_prev = (rgb2gray(gk_prev) * 255).astype("uint8")
-    _, gk = cv2.threshold(gk, 100, 255, cv2.THRESH_BINARY)
-    _, gk_prev = cv2.threshold(gk_prev, 100, 255, cv2.THRESH_BINARY)
+    _, gk = cv2.threshold(gk, 230, 255, cv2.THRESH_BINARY)
+    _, gk_prev = cv2.threshold(gk_prev, 230, 255, cv2.THRESH_BINARY)
 
     # TODO:MOrplogical operation here
 
@@ -108,7 +108,7 @@ def ContourPropagation(gk, gk_prev, ik_pre):
         mode_b = get_modeArr(Mask_b)  # mode of channel b
 
         # Resizing the 2 list points
-        print(len(gk_pointsCnt[0]), len(gk_pre_pointsCnt[0]))
+    #    print(len(gk_pointsCnt[0]), len(gk_pre_pointsCnt[0]))
         if len(gk_pointsCnt[0]) < len(gk_pre_pointsCnt[0]):
             gk_pre_pointsCnt[0] = gk_pre_pointsCnt[0][:len(gk_pointsCnt[0])]
             gk_pre_pointsCnt[1] = gk_pre_pointsCnt[1][:len(gk_pointsCnt[1])]
@@ -116,11 +116,12 @@ def ContourPropagation(gk, gk_prev, ik_pre):
             NewPoints = [gk_pointsCnt[0][len(gk_pre_pointsCnt[0]):], gk_pointsCnt[1][len(gk_pre_pointsCnt[0]):]]
             gk_pointsCnt[0] = gk_pointsCnt[0][:len(gk_pre_pointsCnt[0])]
             gk_pointsCnt[1] = gk_pointsCnt[1][:len(gk_pre_pointsCnt[1])]
-
+      #  ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]=mode_a
+       # ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1],2]=mode_b
         # Shifting the colors from previous to current
         if len(gk_pointsCnt[0]) > 1:
-            ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # a channel
-            ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
+            ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = mode_a  # a channel
+            ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = mode_b # b channel
 
         if len(NewPoints) > 1:
             ik[NewPoints[:][0], NewPoints[:][1], 1] = mode_a  # a channel

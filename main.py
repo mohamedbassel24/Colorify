@@ -2,18 +2,21 @@ from Video_Processing import *
 from Colorization import *
 from Color_Propagation.Contours_Propagation import *
 
-VideoFileName = "Test Video/V2.avi"
+VideoFileName = "Test Video/V6.mp4"
 FrameList = getVideoFrames(VideoFileName)
 ColorizedFrameList = []  # Contain video frames after colorization
 Model = LoadColorizationModel()  # Loading the colorization Model
 isKeyFrame = True  # first frame in the scene only colorized
 I0 = np.zeros((FrameList[0].shape[0], FrameList[0].shape[1]))  # First colorized Frame
-FrameList = FrameList[100:]
+FrameList = FrameList[1:]
 preFrame = 0
 FrameNum = 0
-#TODO:
+# print(np.sum(abs(FrameList[2] - FrameList[1])))
+getFrameShoots(FrameList)
 for frame in FrameList:
-
+    # https://en.wikipedia.org/wiki/Shot_transition_detection
+    print(np.sum(abs(FrameList[FrameNum] - FrameList[FrameNum + 1])))
+    print(np.sum(abs(FrameList[FrameNum] - FrameList[FrameNum + 1])))
     if isKeyFrame:
         I0 = colorization(frame, Model)
         # show_images([I0, frame], ["Colorized", "Original"])
