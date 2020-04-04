@@ -80,9 +80,24 @@ def getFrameShoots(FrameList, Threshold=500):
         shootDet = abs(currDiff - preDifference)
         if shootDet > Threshold:
             # for i in range(len(shootFrames)):
-            show_images([shootFrames[0], shootFrames[-1]], ["Start", "End"])
+            #show_images([shootFrames[0], shootFrames[-1]], ["Start", "End"])
             shootList.append(shootFrames)
             shootFrames = []
-            print(shootDet)
+            #print(shootDet)
         preDifference = currDiff
     return shootList
+
+
+def getKeyFrame(rShoot):
+    MaxContourNumber = 0
+    KeyFrame = rShoot[0]
+    indexKeyFrame = 0
+    for i in range(len(rShoot)):
+        gk = (rgb2gray(rShoot[i]) * 255).astype("uint8")
+        _, gk = cv2.threshold(gk, 230, 255, cv2.THRESH_BINARY)
+        # Get Image Contours
+        contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+        if len(contours_gk) > MaxContourNumber:
+            KeyFrame = rShoot[i]
+            indexKeyFrame = i
+    return KeyFrame, indexKeyFrame
