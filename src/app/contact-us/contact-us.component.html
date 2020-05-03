@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+  <head>
+    <title>Center an Image using text align center</title>
+    <style>
+      .img-container {
+        text-align: center;
+      }
+    </style>
+  </head>
+  
+<h1>About us </h1>
+<p style="text-align: center;">TEDxCairoUniversity was inspired by a small group of college students who dreamed of creating a community where ideas and creativity were appreciated and explored.
+ </p>
+ <p style="text-align: center;">
+  where the Cairo University community could be connected through authentic dialogue and its potential unleashed
+  </p>
+
+  
+ <div class="img-container">
+ <button mat-button style="width:150px;height:100px;">Contact Us</button> <br>
+<img src="/assets/Icons/cropped-TEDxCairoUniversity1-2.png" width="500" height="70"style="text-align: center;">
+</div>
+
+ <mat-card class="history-card">
+        <h3 class="headers">
+            CONTACT US
+        </h3>
+        <br>
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <div class="example-container">
+             <pre class="tab">Name &#9;&#9;&#9;Email&#9;&#9;&#9;Phone</pre>
+                <mat-form-field>
+                    <input matInput [formControl]="Name" placeholder="Enter your Name"  required>
+
+                </mat-form-field>          
+                <mat-form-field>
+                    <input matInput [formControl]="Email" placeholder="Enter your Email" required>
+                </mat-form-field>
+             
+                <mat-form-field>
+                    <textarea matInput [formControl]="Phone" placeholder="Enter your Phone" required></textarea>
+                </mat-form-field>
+                <p>Message</p>
+                 <mat-form-field>
+                    <textarea matInput [formControl]="Message" placeholder="Enter your Message" required  id="MessageField"></textarea>
+                </mat-form-field>
+            </div>
+        </form>
+        <br>
+        <button mat-button type="submit" [disabled]="!profileForm.valid">Submit</button>
+    </mat-card>
+

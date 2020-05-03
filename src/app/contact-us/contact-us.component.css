@@ -1,0 +1,44 @@
+h1,
+h1 {
+  text-align: center;
+}
+h3 {
+    text-align: center;
+  }
+.blue-square-container {
+  text-align: center;
+}
+
+.blue-square {
+  background-color: #0074D9;
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+}
+
+.yellow-square {
+  background-color: #FFDC00;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+}
+
+.green-square {
+  background-color: #3D9970;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  left: 50%;
+  margin-left: -50px;
+}
+
+.history-card {
+  width: 50%;
+  margin-left: 25%;
+  margin-top: 2%;
+}
+
+#MessageField{
+  width: 100%;
+  height: 100%;
+}

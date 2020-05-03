@@ -1,0 +1,47 @@
+.nav-button {
+    color: white;
+}
+
+.page-title {
+    margin-left: 5px;
+}
+.title {
+    margin-left: 30px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.navigation-margin {
+    height: 70vh;
+}
+
+@media (max-width: 650px) {
+    #main-bar {
+        display: none;
+    }
+}
+
+@media (min-width: 650px) {
+    #bts-direc {
+        display: none;
+    }
+}
+
+.mat-toolbar {
+    background-color: #444A55
+}
+
+.mat-sidenav {
+    background-color: black;
+    color: white;
+}
+
+#logo{
+    width:50%; 
+    height:50%;
+    margin-left: 2%;
+}

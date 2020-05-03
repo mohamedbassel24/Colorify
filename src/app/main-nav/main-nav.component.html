@@ -1,0 +1,42 @@
+
+<div style="height: 100%%;">
+  <mat-toolbar color="primary">
+    <div id="bts-direc">
+        <div fxShow="true" fxHide.gt-sm="true">
+        <button mat-button (click)="sidenav.toggle()" class="nav-button"><i class="material-icons">
+            menu
+            </i></button>
+        </div>
+    </div>
+    <div class="title">
+      Colorify
+    </div>
+    <span class="example-spacer"></span>
+    <span class="spacer"></span>
+  
+
+    
+
+   
+  </mat-toolbar>
+
+  <mat-sidenav-container fxFlexFill class="example-container">
+    <mat-sidenav #sidenav fxLayout="column">
+        <div fxLayout="column">
+        <hr>
+        <a routerLink="/team" routerLinkActive="active" mat-button>TEAM</a>
+        <hr>
+    </div>
+ 
+    </mat-sidenav>   
+    <mat-sidenav-content fxFlexFill>
+    <router-outlet></router-outlet>
+    <app-home></app-home> 
+    <div class="navigation-margin"></div>
+
+
+  
+    <app-footer></app-footer>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
