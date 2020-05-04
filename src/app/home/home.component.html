@@ -1,11 +1,21 @@
-<div class="top-banner"> 
+<div style="background-image: url('../../assets/background.jpg');"><div class="top-banner"> 
     <div style="margin: auto;
     padding: 40vh 3em 10vh;
     max-width: 800px;
     align-items: center;
     text-align: center;"> 
         <h1 style="font-weight: 400;
-        margin-bottom: 0;">Bring new life to your memories.</h1>
-        <p>The easiest way to add realistic color to black and white photos. Simply grab color from an existing image and paint it on the black and white photo.</p>
+        margin-bottom: 0;color:white;">Bring new life to your memories.</h1>
+        <p style="color:white;">The easiest way to add realistic color to black and white photos. Simply grab color from an existing image and paint it on the black and white photo.</p>
     </div>
 </div>
+</div>
+<div class="drop-image"  >
+    <div class="text-wrapper">
+      <div class="centered">Drop your image here! or use the upload button</div>
+      <div class="upload-btn-wrapper">
+        <button class="btn">Upload a file</button>
+        <input type="file" name="myfile" (change)="onFilesChange($event.target['files'])"/>
+      </div>
+    </div>
+  </div>
