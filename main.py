@@ -19,20 +19,22 @@ for shootFrames in shootList:
     I0 = colorization(keyFrame, Model)
     ColorizedFrameList.append(I0)
     # Forward Propagation
-    for i in range(indexKeyFrame + 1, len(shootFrames)):
+    for i in range(indexKeyFrame + 1, len(shootFrames),1):
         Gk = shootFrames[i]
         Ik_1 = ColorizedFrameList[-1]
         Gk_1 = shootFrames[i - 1]
-        # show_images([Ik_1, Gk_1, Gk], ["Colorized Pre", "pre frame", "curr frame"])
+    #    show_images([Ik_1, Gk_1, Gk], ["Colorized Pre", "pre frame", "curr frame"])
         ColorizedFrameList.append(ContourPropagation(Gk, Gk_1, Ik_1))
         # show_images([ColorizedFrameList[-1], frame], ["Colorized", "Original"])
         WriteFrames(FrameNum, ColorizedFrameList[-1])
         FrameNum += 1
     # Backward Propagation
     for i in range(indexKeyFrame - 1, 0, -1):
+
         Gk = shootFrames[i]
         Ik_1 = ColorizedFrameList[0]
         Gk_1 = shootFrames[i + 1]
+        show_images([Ik_1, Gk_1, Gk], ["Colorized Pre", "post frame", "curr frame"])
         ColorizedFrameList.insert(0,ContourPropagation(Gk, Gk_1, Ik_1))  # insert at beginning
         WriteFrames(FrameNum, ColorizedFrameList[0])
         FrameNum += 1

@@ -25,6 +25,8 @@ def getContourAverage(img, cnt):
     for kp in range(len(pnts[0])):  # outer points
         x = x + pnts[0][kp]
         y = y + pnts[1][kp]
+    if len(pnts[0]) == 0:
+        return 0, 0
     return [np.uint8(np.ceil(x / len(pnts[0]))), np.uint8(np.ceil(y / len(pnts[0])))]
 
 
@@ -49,8 +51,8 @@ def get_modeArr(Arr):
     return mode_info[0]
 
 
-def ContourPropagation(gk, gk_prev, ik_pre):
-    """ Propagate color through img contours"""
+def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103, UseMode=False):
+    """ Propagate color through img contours """
 
     # Convert RGB to LAB color model
     ik_pre = color.rgb2lab(ik_pre)
@@ -58,23 +60,31 @@ def ContourPropagation(gk, gk_prev, ik_pre):
     ik = np.zeros(ik_pre.shape, dtype="float64")  # lab is a float data type
     # get the GrayScale of current frame and reformative it in range of 0 99
     ik[:, :, 0] = (rgb2gray(gk_prev)) * 100
+    # Create a map to track each pixel
+    PixelMap = np.zeros((ik_pre.shape[0], ik_pre.shape[1]))
     # Convert to Binary Image
 
     gk = (rgb2gray(gk) * 255).astype("uint8")
     gk_prev = (rgb2gray(gk_prev) * 255).astype("uint8")
-    _, gk = cv2.threshold(gk, 230, 255, cv2.THRESH_BINARY)
-    _, gk_prev = cv2.threshold(gk_prev, 230, 255, cv2.THRESH_BINARY)
 
-    # TODO:MOrplogical operation here
+    GlobalThresh = threshold_otsu(gk)
+   # GlobalThresh = BinaryThreshold
+    #  GlobalThresh = 111
+   # GlobalThresh = 103
 
+    _, gk = cv2.threshold(gk, GlobalThresh, 255, cv2.THRESH_BINARY)
+    _, gk_prev = cv2.threshold(gk_prev, GlobalThresh, 255, cv2.THRESH_BINARY)
+    if ShowSteps:
+        show_images([gk, gk_prev])
     # Get Image Contours
-    contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
-    contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
+    contours_gk_pre, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+    contours_gk, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
 
     # Match Contours
-    for cnt_Gk in contours_gk:
+
+    for cnt_Gk in contours_gk:  # for each contour in the current frame
         MatchedGkPre = cnt_Gk
-        center_cntGK = getContourAverage(gk, cnt_Gk)
+        center_cntGK = getContourAverage(gk, cnt_Gk)  # get the Center of mass for each contour
         # finding the corresponding contour in previous frame
         MinDis = 100
         IndexToRemove = 0
@@ -85,47 +95,79 @@ def ContourPropagation(gk, gk_prev, ik_pre):
             # get distance between 2 contour centers
             D2Center = np.sqrt(
                 (int(center_cntGK[0]) - int(center_match[0])) ** 2 + (int(center_cntGK[1]) - int(center_match[1])) ** 2)
-            if matchingRatio < 0.01:
+            #   print(D2Center)
+            if matchingRatio < 0.01 and D2Center < 10:  # it was found that 0.01 and 10 are suitable for matching
                 MinDis = D2Center  # get the minimum distance
                 IndexToRemove = cnt_Index
                 MatchedGkPre = contours_gk_pre[cnt_Index]
+                if ShowSteps:
+                    print("Match Counters with Distance  ", D2Center, "Matching Ratio :", matchingRatio)
                 break
-        # remove the last pick from list
+
+        # remove the picked counter from list to avoid matching it again
         if len(contours_gk_pre) != 0:
             contours_gk_pre.pop(IndexToRemove)
 
         # GET  the points of the contour
-        gk_pointsCnt = getContourPoints(gk, cnt_Gk)
-        gk_pre_pointsCnt = getContourPoints(gk_prev, MatchedGkPre)
+        gk_pointsCnt = getContourPoints(gk, cnt_Gk)  # points from current frame
+        gk_pre_pointsCnt = getContourPoints(gk_prev, MatchedGkPre)  # points from pre frame
 
+        # assign the points for each contour in the global map
+        PixelMap[gk_pointsCnt[0], gk_pointsCnt[1]] = 1
         [cX, cY] = getContourAverage(gk_prev, MatchedGkPre)
-        # casting from nparray to list
-        NewPoints = []
+
         # getting the pixels that are outer of the matched contour
-        Mask_a = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # pixels of the contour
-        Mask_b = ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]
+        Mask_a = ik_pre[gk_pointsCnt[0], gk_pointsCnt[1], 1]  # pixels of the contour
+        Mask_b = ik_pre[gk_pointsCnt[0], gk_pointsCnt[1], 2]
         mode_a = get_modeArr(Mask_a)  # mode of channel a
         mode_b = get_modeArr(Mask_b)  # mode of channel b
 
         # Resizing the 2 list points
-    #    print(len(gk_pointsCnt[0]), len(gk_pre_pointsCnt[0]))
         if len(gk_pointsCnt[0]) < len(gk_pre_pointsCnt[0]):
             gk_pre_pointsCnt[0] = gk_pre_pointsCnt[0][:len(gk_pointsCnt[0])]
             gk_pre_pointsCnt[1] = gk_pre_pointsCnt[1][:len(gk_pointsCnt[1])]
+            if UseMode:
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = mode_a  # a channel
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = mode_b  # b channel
+            else:
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[
+                    gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # a channel
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[
+                    gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
         elif len(gk_pointsCnt[0]) > len(gk_pre_pointsCnt[0]):
-            NewPoints = [gk_pointsCnt[0][len(gk_pre_pointsCnt[0]):], gk_pointsCnt[1][len(gk_pre_pointsCnt[0]):]]
+
+            # NewPoints = [gk_pointsCnt[0][len(gk_pre_pointsCnt[0]):], gk_pointsCnt[1][len(gk_pre_pointsCnt[0]):]]
+
             gk_pointsCnt[0] = gk_pointsCnt[0][:len(gk_pre_pointsCnt[0])]
             gk_pointsCnt[1] = gk_pointsCnt[1][:len(gk_pre_pointsCnt[1])]
-      #  ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]=mode_a
-       # ik_pre[gk_pre_pointsCnt[0], gk_pre_pointsCnt[1],2]=mode_b
-        # Shifting the colors from previous to current
-        if len(gk_pointsCnt[0]) > 1:
-            ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = mode_a  # a channel
-            ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = mode_b # b channel
+            if UseMode:
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = mode_a  # a channel
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = mode_b  # b channel
+            else:
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[
+                    gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # a channel
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[
+                    gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
+        else:
+            #  if len(SamePoints) > 1:
+            #  ik[SamePoints[:][:, 0], SamePoints[:][:, 1], 1] = ik_pre[SamePoints[:][:, 0], SamePoints[:][:, 1], 1]  # a channel
+            #  ik[SamePoints[:][:, 0], SamePoints[:][:, 1], 2] = ik_pre[SamePoints[:][:, 0], SamePoints[:][:, 1], 2]  # b channel
+            # ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[gk_pointsCnt[0], gk_pointsCnt[1], 1]  # a channel
+            # ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[gk_pointsCnt[0], gk_pointsCnt[1], 2]  # b channel
+            if UseMode:
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = mode_a  # a channel
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = mode_b  # b channel
+            else:
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[
+                    gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 1]  # a channel
+                ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[
+                    gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
 
-        if len(NewPoints) > 1:
-            ik[NewPoints[:][0], NewPoints[:][1], 1] = mode_a  # a channel
-            ik[NewPoints[:][0], NewPoints[:][1], 2] = mode_b  # b channel
+
+    #propagte the pixels with no contours 
+    ik[PixelMap == 0, 1] = ik_pre[PixelMap == 0, 1]
+    ik[PixelMap == 0, 2] = ik_pre[PixelMap == 0, 2]
+
     # Convert to RGB color model
 
     ik = color.lab2rgb(ik)

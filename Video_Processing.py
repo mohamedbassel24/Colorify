@@ -22,7 +22,7 @@ def getVideoFrames(FileName):
 
 def WriteFrames(FileName, image):
     """This function return all the video or clip frames """
-    filename = 'Output/Frame#' + str(FileName) + '.png'
+    filename = 'Output/' + str(FileName) + '.Frame.png'
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     # image = cv2.resize(image, (720, 1024))
     cv2.imwrite(filename, image)
@@ -80,10 +80,10 @@ def getFrameShoots(FrameList, Threshold=500):
         shootDet = abs(currDiff - preDifference)
         if shootDet > Threshold:
             # for i in range(len(shootFrames)):
-            #show_images([shootFrames[0], shootFrames[-1]], ["Start", "End"])
+            # show_images([shootFrames[0], shootFrames[-1]], ["Start", "End"])
             shootList.append(shootFrames)
             shootFrames = []
-            #print(shootDet)
+            # print(shootDet)
         preDifference = currDiff
     return shootList
 
@@ -101,3 +101,20 @@ def getKeyFrame(rShoot):
             KeyFrame = rShoot[i]
             indexKeyFrame = i
     return KeyFrame, indexKeyFrame
+
+
+def FramesToVideo(dirr):
+    img_array = []
+    size = 0
+    for filename in sorted(glob.glob(dirr)):
+        print(filename)
+        img = cv2.imread(filename)
+        height, width, layers = img.shape
+        size = (width, height)
+        img_array.append(img)
+
+    out = cv2.VideoWriter('project.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+
+    for i in range(len(img_array)):
+        out.write(img_array[i])
+    out.release()
