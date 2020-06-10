@@ -1,0 +1,2 @@
+model_checkpoint_path: "HumanDataset"
+all_model_checkpoint_paths: "HumanDataset"
