@@ -1,6 +1,7 @@
 from commonfunctions import *
 from skimage import io, color
 from scipy import stats
+from Video_Processing import WriteFrames
 
 
 def getContourCenter(cnt):
@@ -51,7 +52,7 @@ def get_modeArr(Arr):
     return mode_info[0]
 
 
-def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103, UseMode=False):
+def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103, UseMode=True):
     """ Propagate color through img contours """
 
     # Convert RGB to LAB color model
@@ -59,7 +60,7 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
     # initialize the output color image
     ik = np.zeros(ik_pre.shape, dtype="float64")  # lab is a float data type
     # get the GrayScale of current frame and reformative it in range of 0 99
-    ik[:, :, 0] = (rgb2gray(gk_prev)) * 100
+    ik[:, :, 0] = (rgb2gray(gk)) * 100
     # Create a map to track each pixel
     PixelMap = np.zeros((ik_pre.shape[0], ik_pre.shape[1]))
     # Convert to Binary Image
@@ -68,17 +69,17 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
     gk_prev = (rgb2gray(gk_prev) * 255).astype("uint8")
 
     GlobalThresh = threshold_otsu(gk)
-   # GlobalThresh = BinaryThreshold
+    # GlobalThresh = BinaryThreshold
     #  GlobalThresh = 111
-   # GlobalThresh = 103
+    # GlobalThresh = 103
 
     _, gk = cv2.threshold(gk, GlobalThresh, 255, cv2.THRESH_BINARY)
     _, gk_prev = cv2.threshold(gk_prev, GlobalThresh, 255, cv2.THRESH_BINARY)
     if ShowSteps:
         show_images([gk, gk_prev])
     # Get Image Contours
-    contours_gk_pre, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
-    contours_gk, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
+    _, contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+    _, contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
 
     # Match Contours
 
@@ -136,8 +137,6 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
                     gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
         elif len(gk_pointsCnt[0]) > len(gk_pre_pointsCnt[0]):
 
-            # NewPoints = [gk_pointsCnt[0][len(gk_pre_pointsCnt[0]):], gk_pointsCnt[1][len(gk_pre_pointsCnt[0]):]]
-
             gk_pointsCnt[0] = gk_pointsCnt[0][:len(gk_pre_pointsCnt[0])]
             gk_pointsCnt[1] = gk_pointsCnt[1][:len(gk_pre_pointsCnt[1])]
             if UseMode:
@@ -149,11 +148,6 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
                 ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[
                     gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
         else:
-            #  if len(SamePoints) > 1:
-            #  ik[SamePoints[:][:, 0], SamePoints[:][:, 1], 1] = ik_pre[SamePoints[:][:, 0], SamePoints[:][:, 1], 1]  # a channel
-            #  ik[SamePoints[:][:, 0], SamePoints[:][:, 1], 2] = ik_pre[SamePoints[:][:, 0], SamePoints[:][:, 1], 2]  # b channel
-            # ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = ik_pre[gk_pointsCnt[0], gk_pointsCnt[1], 1]  # a channel
-            # ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[gk_pointsCnt[0], gk_pointsCnt[1], 2]  # b channel
             if UseMode:
                 ik[gk_pointsCnt[0], gk_pointsCnt[1], 1] = mode_a  # a channel
                 ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = mode_b  # b channel
@@ -163,8 +157,7 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
                 ik[gk_pointsCnt[0], gk_pointsCnt[1], 2] = ik_pre[
                     gk_pre_pointsCnt[0], gk_pre_pointsCnt[1], 2]  # b channel
 
-
-    #propagte the pixels with no contours 
+    # propagate the pixels with no contours
     ik[PixelMap == 0, 1] = ik_pre[PixelMap == 0, 1]
     ik[PixelMap == 0, 2] = ik_pre[PixelMap == 0, 2]
 
@@ -172,7 +165,35 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
 
     ik = color.lab2rgb(ik)
     ik = (ik * 255).astype("uint8")
-
-    # Use a median filter to overcome some grayscale pixels
-    # ik = cv2.bilateralFilter(ik, 300, 20, 100)
     return ik
+
+
+def ColorPropagation_ShootFrames(shootFrames, keyFrame, indexKeyFrame):
+    print("[INFO] starting Color Propagation in shot...")
+    # List of All colorized Frames
+    ColorizedFrameList = [keyFrame]
+    # Forward Propagation from index frame to the end of the frame list
+    for i in range(indexKeyFrame + 1, len(shootFrames), 1):
+        # Current GrayScale Image
+        Gk = shootFrames[i]
+        # Previous Colorized Frame
+        Ik_1 = ColorizedFrameList[-1]
+        # Previous GrayScale Image
+        Gk_1 = shootFrames[i - 1]
+        #    show_images([Ik_1, Gk_1, Gk], ["Colorized Pre", "pre frame", "curr frame"])
+        ColorizedFrameList.append(ContourPropagation(Gk, Gk_1, Ik_1))
+        # show_images([ColorizedFrameList[-1], frame], ["Colorized", "Original"])
+        WriteFrames(i, ColorizedFrameList[-1])
+    # Backward Propagation from index frame to the start of the frame list
+    for i in range(indexKeyFrame - 1, 0, -1):
+        # Current GrayScale Image
+        Gk = shootFrames[i]
+        # Previous Colorized Frame
+        Ik_1 = ColorizedFrameList[0]
+        # Previous GrayScale Image
+        Gk_1 = shootFrames[i + 1]
+        # show_images([Ik_1, Gk_1, Gk], ["Colorized Pre", "post frame", "curr frame"])
+        ColorizedFrameList.insert(0, ContourPropagation(Gk, Gk_1, Ik_1))  # insert at beginning
+        WriteFrames(i, ColorizedFrameList[0])
+    print("[INFO] Color Propagation is done...")
+    return ColorizedFrameList

@@ -21,12 +21,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
-# Edges
 
-#Learning Models
-from imutils.video import VideoStream
-import argparse
-import imutils
 import time
 
 
