@@ -8,11 +8,16 @@ Simply put, the mission of this project is to colorize and restore old images an
 * [Discriminator](#discriminator) 
 
 
-3.[ColorPropagation](#colorpropagation)  
+3.[Color Propagation](#colorpropagation)  
 4.[Results](#results)  
 5.[References](#references)  
 ## Shot transition detection
+Shot transition detection is used to split up a movie into basic temporal units called shots where the camera is fixed in each shot.
+we need this aproche to make it easier to deal with a complete movie.<br/>We divide the moive into shots by using 
+*Sum of absolute differences* (SAD). <br/>This is both the most obvious and most simple algorithm of all: The two consecutive grayscale frames are compared pixel by pixel, summing up the absolute values of the differences of each two corresponding pixels. 
 ## Model Architcture
+
+![alt text](https://ibb.co/hX6YPqV)
 ### Generator
 ### Discriminator
 ## ColorPropagation
