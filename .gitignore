@@ -11,3 +11,5 @@ model/pts_in_hull.npy
 *.iml
 .idea/Color-IT.iml
 .idea/misc.xml
+
+.idea/
