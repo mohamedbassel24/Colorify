@@ -2,8 +2,8 @@
 Colorization is the process of addition of colour to a black and white video or image. A gray scale image is a scalar but A colored image is a vector valued function often represented as three separate channels. So, the colorization process requires mapping of a scalar to a vector (r,g,b) valued function which has no unique solution.
 Simply put, the mission of this project is to colorize and restore old images and movies.
 ## Table of Contents  
-1.[How to Start ?](#prerequisites)
-* [Required Libraries](#generator) 
+1.[How to Start ?](#how-to-run-the-project)
+* [Dependencies](#dependencies) 
 * [Project's  Structure](#discriminator)   
 
 2.[Shot transition detection](#shot-transition-detection)  
@@ -15,13 +15,24 @@ Simply put, the mission of this project is to colorize and restore old images an
 4.[Color Propagation](#color-propagation)  
 5.[Results](#results)  
 6.[References](#references)  
+
+## How To Run The Project?
+### Dependencies 
+- Numpy
+- Opencv
+- PIL
+- Keras
+- moviepy
+
+note you can view dependencies.txt for more details
 ## Shot transition detection
 <p align="center">
 <img src="https://www.ibm.com/blogs/research/wp-content/uploads/2018/09/VSD2.png" width="600" height="300">
 </p>
 Shot transition detection is used to split up a movie into basic temporal units called shots where the camera is fixed in each shot.
 we need this aproche to make it easier to deal with a complete movie.<br/>We divide the moive into shots by using 
-*Sum of absolute differences* (SAD).This is both the most obvious and most simple algorithm of all: The two consecutive grayscale frames are compared pixel by pixel, summing up the absolute values of the differences of each two corresponding pixels. 
+*Sum of absolute differences* (SAD).<br>This is both the most obvious and most simple algorithm of all: The two consecutive grayscale frames are compared pixel by pixel, summing up the absolute values of the differences of each two corresponding pixels. 
+
 ## Model Architcture
 <p align="center">
 <img src="https://bolster.ai/blog/content/images/size/w2000/2020/04/GAN-1.png" width="600" height="300">
@@ -39,6 +50,17 @@ The generator can be broken down into two pieces: the encoder and decoder
 ### Discriminator
 The discriminator is a much simpler model than its counterpart, the generator, because it’s a standard Convolutional Neural Network (CNN) that is used to predict whether the RGB channels are real or fake. It has eight 2-stride convolutional layers each which consists of dropout, leaky relu activation, and, except for the first layer, batch normalization
 ## Color Propagation
-Color Propagation is to propagate the color of each contour in the key frame( the frame which colorized by the generator model) to other video frames of the same shot by comparing each contour in each consecutive frame. 
+Color Propagation is used to propagate the color of each contour in the key frame( the frame which colorized by the generator model) to other video frames of the same shot by comparing each contour in each consecutive frame after converting the pre colorized frame to LAB.
+### Converting from RGB to LAB
+
+The first step was converting the images from their standard RGB color channels into CIE-LAB where the 3 new channels consist of:
+- L - Represents the white to black trade off of the pixels
+- A - Represents the red to green trade off of the pixels
+- B - Represents the blue to yellow trade off of the pixels
+<p align="center">
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/CIELAB_color_space_front_view.png" width="300" height="300">
+</p>
+The L channel is going to by the current frame and propapagte a&b channel from the previous colorized frame.
+
 ## Results
 ## References
