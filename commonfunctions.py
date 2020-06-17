@@ -26,7 +26,7 @@ import time
 
 
 
-
+import os
 # Show the figures / plots inside the notebook
 def show_images(images, titles=None):
     # This function is used to show image(s) with titles by sending an array of images and an array of associated titles.

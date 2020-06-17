@@ -13,3 +13,7 @@ model/pts_in_hull.npy
 .idea/misc.xml
 
 .idea/
+
+Colorization/Human Dataset Notebook/kaggle/vgg16_weights_tf_dim_ordering_tf_kernels.h5
+
+*.mp4

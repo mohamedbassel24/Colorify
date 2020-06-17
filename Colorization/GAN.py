@@ -75,19 +75,16 @@ def CreateGenerator(DropOut, Alpha, InputShape=(512, 512, 3)):
 
 
 def Load_GAN():
-    # uncomment this if you are load_model
-    custom = {'custom_loss2': 11111}
-   # return load_model("Colorization/" + "mEpoch-{}".format(24),
-                     # custom_objects={'custom_loss34': custom['custom_loss2']})
     # Loading weights not the model
     drop_rate = .5
     # We need to Create the Model first
     gen_model = CreateGenerator(drop_rate, .2)
     # Load his weights
-    gen_model.load_weights("Colorization/HumanDataset")
-    print("[INFO]  Generator Model is Loaded Successfully..")
-    #
-    # gen_model=load_model('gen_model.h5', custom_objects={'custom_loss34': custom['custom_loss2']})
+    gen_model.load_weights("Colorization/Epoch-{}".format(54))
+    print("[INFO] Generator Model is Loaded Successfully..")
+    custom = {'custom_loss2': 11111}
+    # uncomment this if you are load_model
+    # return load_model("Colorization/" + "mEpoch-{}".format(24),custom_objects={'custom_loss34': custom['custom_loss2']})
     return gen_model
 
 
@@ -105,7 +102,7 @@ def colorization(img, GeneratorModel):
     ColorizedImage = np.copy(Images[0])
     ColorizedImage = np.array(ColorizedImage, dtype='uint8')
     ColorizedImage = cv2.resize(ColorizedImage, (originalShape[1], originalShape[0]), interpolation=cv2.INTER_AREA)
-    show_images([ColorizedImage])
+    # show_images([ColorizedImage])
 
     return ColorizedImage
 

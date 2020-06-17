@@ -17,18 +17,20 @@ def getVideoFrames(FileName):
     return VideoFrames
 
 
-def WriteFrames(FileName, image):
+def WriteFrames(FileName, image, ShootNum):
     """This function return all the video or clip frames """
-    filename = 'Output/' + str(FileName) + '.Frame.png'
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    # image = cv2.resize(image, (720, 1024))
+    filename = 'Output/Shoot#' + str(ShootNum) + '/' + str(FileName) + '.Frame.png'
+    # Convert from BGR to RGB
+    image = image[:, :, ::-1]
+    # Write Frame
     cv2.imwrite(filename, image)
     print("[INFO] Frame" + str(FileName) + " has been written...done")
+
 
 def WriteImage(image):
     """This function return all the video or clip frames """
     filename = 'Output/' + "ColorizedImage" + '.png'
-    cv2.imwrite(filename, image)
+    cv2.imwrite(filename, image[:, :, ::-1])
     print("[INFO] Image has been written...done")
 
 
@@ -59,6 +61,9 @@ def getFrameShoots(frameList, Threshold, showSteps=False):
             # reset the shootFrames
             shootFrames = []
         preDifference = pixelDifference
+    if len(shootList) == 0:
+        print("[INFO] no shoot detection for this video, tune the threshold")
+        shootList = [frameList]
     print("[INFO] Shoot Detection .. done Total #Shots is ", len(shootList))
     return shootList
 
@@ -80,6 +85,7 @@ def getKeyFrame(rShoot):
         if len(contours_gk) > MaxContourNumber:
             KeyFrame = rShoot[i]
             indexKeyFrame = i
+    print("INFO : get KeyFrame in shoot is Done .. ")
     return KeyFrame, indexKeyFrame
 
 
@@ -103,7 +109,7 @@ def FramesToVideo(dirr):
 def WriteMovieFrames(MovieFrames, MovieName):
     height, width, layers = MovieFrames[0].shape
     size = (width, height)
-    out = cv2.VideoWriter(MovieName + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 20, size)
+    out = cv2.VideoWriter(MovieName + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 24, size)
     for i in range(len(MovieFrames)):
         MovieFrames[i] = cv2.cvtColor(MovieFrames[i], cv2.COLOR_BGR2RGB)
         out.write(MovieFrames[i])
