@@ -81,7 +81,7 @@ def getKeyFrame(rShoot):
         gk = (rgb2gray(rShoot[i]) * 255).astype("uint8")
         _, gk = cv2.threshold(gk, 200, 255, cv2.THRESH_BINARY)
         # Get Image Contours
-        _, contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+        contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
         if len(contours_gk) > MaxContourNumber:
             KeyFrame = rShoot[i]
             indexKeyFrame = i

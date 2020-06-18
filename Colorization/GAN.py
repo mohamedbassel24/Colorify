@@ -80,7 +80,8 @@ def Load_GAN():
     # We need to Create the Model first
     gen_model = CreateGenerator(drop_rate, .2)
     # Load his weights
-    gen_model.load_weights("Colorization/Epoch-{}".format(54))
+    gen_model.load_weights("Colorization/Human Dataset Notebook/kaggle/GanWeights/Epoch-{}".format(39))
+    gen_model.load_weights("Colorization/Human Dataset Notebook/kaggle/GeneratorWeights/Epoch-{}".format(39))
     print("[INFO] Generator Model is Loaded Successfully..")
     custom = {'custom_loss2': 11111}
     # uncomment this if you are load_model

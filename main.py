@@ -2,11 +2,11 @@ from Colorization.GAN import Load_GAN, colorization
 from Video_Processing import *
 from Color_Propagation.Contours_Propagation import ColorPropagation_ShootFrames
 
-videoPath = "test_data/Videos/The Breathtaking Beauty of Nature - HD.mp4    "  # The Path of Image to be colorized
-imgPath = "test_data/Images/p1.jpg"  # The path of video to be colorized
+videoPath = "test_data/Videos/Little Lion is walking on the grass without shoes....mp4    "  # The Path of Image to be colorized
+imgPath = "test_data/Images/park.jpg"  # The path of video to be colorized
 
 VideoMode = 1  # 0: Image Colorization , 1:Video Colorization
-ColorizationByFrame = 0
+ColorizationByFrame = 1
 # Load Generator Model
 gen_model = Load_GAN()
 if VideoMode:

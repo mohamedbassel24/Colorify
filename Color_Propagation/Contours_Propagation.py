@@ -90,8 +90,8 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
     if ShowSteps:
         show_images([gk, gk_prev])
     # Get Image Contours
-    _, contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
-    _, contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
+    contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+    contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
 
     # Match Contours
 
