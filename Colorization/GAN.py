@@ -74,7 +74,7 @@ def CreateGenerator(DropOut, Alpha, InputShape=(512, 512, 3)):
     return Model(inputs=GeneratorInput, outputs=GenOut)
 
 
-def Load_GAN():
+def Load_GAN_Human():
     # Loading weights not the model
     drop_rate = .5
     # We need to Create the Model first
@@ -82,6 +82,20 @@ def Load_GAN():
     # Load his weights
     gen_model.load_weights("Colorization/Human Dataset Notebook/kaggle/GanWeights/Epoch-{}".format(39))
     gen_model.load_weights("Colorization/Human Dataset Notebook/kaggle/GeneratorWeights/Epoch-{}".format(39))
+    print("[INFO] Generator Model is Loaded Successfully..")
+    custom = {'custom_loss2': 11111}
+    # uncomment this if you are load_model
+    # return load_model("Colorization/" + "mEpoch-{}".format(24),custom_objects={'custom_loss34': custom['custom_loss2']})
+    return gen_model
+
+def Load_GAN_Nature():
+    # Loading weights not the model
+    drop_rate = .5
+    # We need to Create the Model first
+    gen_model = CreateGenerator(drop_rate, .2)
+    # Load his weights
+    gen_model.load_weights("Colorization/Natural Dataset Notebook/Gan/Epoch-{}".format(63))
+    gen_model.load_weights("Colorization/Natural Dataset Notebook/Generator/Epoch-{}".format(63))
     print("[INFO] Generator Model is Loaded Successfully..")
     custom = {'custom_loss2': 11111}
     # uncomment this if you are load_model

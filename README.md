@@ -1,3 +1,15 @@
+# Integration with GUI
+
+python argv[0] argv[1] argv[2] argv[3]
+argv[0] = main.py
+argv[1] = 0 => Image Colorization , 1 : Video Colorization
+argv[2] = 0 => Human model , 1 : Nature model
+argv[3] = file name 
+
+
+
+
+
 # Colorify - Movie Colorization Application
 Colorization is the process of addition of colour to a black and white video or image. A gray scale image is a scalar but A colored image is a vector valued function often represented as three separate channels. So, the colorization process requires mapping of a scalar to a vector (r,g,b) valued function which has no unique solution.
 Simply put, the mission of this project is to colorize and restore old images and movies.

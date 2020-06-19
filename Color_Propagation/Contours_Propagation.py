@@ -193,7 +193,7 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
 def ColorPropagation_ShootFrames(shootFrames, keyFrame, indexKeyFrame, ShootNum):
     # Creating a directory for a processing shoot
     try:
-        os.mkdir("Output/Shoot#" + str(ShootNum + 1))
+        os.mkdir("Input_and_Output/Shoot#" + str(ShootNum + 1))
     except OSError as error:
         # Avoid error if the directory already created
         pass

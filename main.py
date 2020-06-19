@@ -1,22 +1,31 @@
-from Colorization.GAN import Load_GAN, colorization
+from Colorization.GAN import Load_GAN_Human,Load_GAN_Nature, colorization
 from Video_Processing import *
 from Color_Propagation.Contours_Propagation import ColorPropagation_ShootFrames
+import sys
 
-videoPath = "test_data/Videos/Little Lion is walking on the grass without shoes....mp4    "  # The Path of Image to be colorized
-imgPath = "test_data/Images/park.jpg"  # The path of video to be colorized
-
-VideoMode = 1  # 0: Image Colorization , 1:Video Colorization
-ColorizationByFrame = 1
+#videoPath = "test_data/Videos/park1.mp4"  # The Path of Image to be colorized
+#imgPath = "test_data/Images/park.jpg"  # The path of video to be colorized
+videoPath = "Input_and_Output/" + sys.argv[3]
+imgPath = "Input_and_Output/" + sys.argv[3]
+VideoMode = int(sys.argv[1])  # 0: Image Colorization , 1:Video Colorization
+ColorizationByFrame = 0
 # Load Generator Model
-gen_model = Load_GAN()
-if VideoMode:
+if int(sys.argv[2]) == 0:                # load human model
+    gen_model = Load_GAN_Human()
+else:                               # load nature model
+    gen_model = Load_GAN_Nature()
+
+print(videoPath)
+print(VideoMode)
+if VideoMode == 1:
     # load movie Frames
     FrameList = getVideoFrames(videoPath)
     # List Contain movie frames after colorization
     ColorizedFrameList = []
     if not ColorizationByFrame:
         # cut the movie into shoots
-        shootList = getFrameShoots(FrameList, Threshold=4500, showSteps=False)  # tune this Threshold for each video
+        #shootList=[FrameList]
+        shootList = getFrameShoots(FrameList, Threshold=6000, showSteps=False)  # tune this Threshold for each video
         for i in range(len(shootList)):
             print("INFO : Shoot #", i + 1, "/", len(shootList), " is Processing .. ")
             # get the keyFrame: Frame that contains most of objects and return its index in the shootList
@@ -36,9 +45,10 @@ if VideoMode:
             # increment frame counter
             count_frame += 1
     # Integrate frames to make a complete movie
-    WriteMovieFrames(ColorizedFrameList, "Output/OutputVideo")
+    WriteMovieFrames(ColorizedFrameList, "Input_and_Output/OutputVideo")
     # Link Movie Audio with the Frames
-    IntegrateAudio(videoPath, "Output/OutputVideo")
+    IntegrateAudio(videoPath, "Input_and_Output/OutputVideo")
+
 else:
 
     img = io.imread(imgPath)  # Read image

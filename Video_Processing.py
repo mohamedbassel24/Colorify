@@ -19,7 +19,7 @@ def getVideoFrames(FileName):
 
 def WriteFrames(FileName, image, ShootNum):
     """This function return all the video or clip frames """
-    filename = 'Output/Shoot#' + str(ShootNum) + '/' + str(FileName) + '.Frame.png'
+    filename = 'Input_and_Output/Shoot#' + str(ShootNum) + '/' + str(FileName) + '.Frame.png'
     # Convert from BGR to RGB
     image = image[:, :, ::-1]
     # Write Frame
@@ -29,7 +29,7 @@ def WriteFrames(FileName, image, ShootNum):
 
 def WriteImage(image):
     """This function return all the video or clip frames """
-    filename = 'Output/' + "ColorizedImage" + '.png'
+    filename = 'Input_and_Output/' + "ColorizedImage" + '.png'
     cv2.imwrite(filename, image[:, :, ::-1])
     print("[INFO] Image has been written...done")
 
@@ -54,7 +54,7 @@ def getFrameShoots(frameList, Threshold, showSteps=False):
         shootDet = abs(pixelDifference - preDifference)
         if showSteps:
             print(pixelDifference, shootDet)
-        if shootDet > Threshold and len(shootFrames) > 20:  # avoid catching too many transition
+        if shootDet > Threshold and len(shootFrames) > 45:  # avoid catching too many transition
             if showSteps:
                 show_images([shootFrames[0], shootFrames[-1]], ["Start", "End"])
             shootList.append(shootFrames)
@@ -64,6 +64,11 @@ def getFrameShoots(frameList, Threshold, showSteps=False):
     if len(shootList) == 0:
         print("[INFO] no shoot detection for this video, tune the threshold")
         shootList = [frameList]
+        shootFrames = []
+
+    if len(shootFrames) != 0:
+        shootList.append(shootFrames)            # to append last frames after the last end of last shoot
+
     print("[INFO] Shoot Detection .. done Total #Shots is ", len(shootList))
     return shootList
 
@@ -99,7 +104,7 @@ def FramesToVideo(dirr):
         size = (width, height)
         img_array.append(img)
 
-    out = cv2.VideoWriter('Output/OutputVideo.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+    out = cv2.VideoWriter('Input_and_Output/OutputVideo.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
 
     for i in range(len(img_array)):
         out.write(img_array[i])
@@ -126,13 +131,13 @@ def IntegrateAudio(Videopath, MovieName):
     video = moviepy.editor.VideoFileClip(Videopath)
     audio = video.audio
     # Create the audio file
-    audio.write_audiofile("Output/sample.mp3")
+    audio.write_audiofile("Input_and_Output/sample.mp3")
     # Read Colorized Video
     my_clip = moviepy.editor.VideoFileClip(MovieName + ".avi")
     # Read audio of B&W
-    final_audio = moviepy.editor.AudioFileClip('Output/sample.mp3')
+    final_audio = moviepy.editor.AudioFileClip('Input_and_Output/sample.mp3')
     # Integrate both of them
     final_clip = my_clip.set_audio(final_audio)
     # Write the output
-    final_clip.write_videofile("Output/LastOutput.mp4")
+    final_clip.write_videofile("Input_and_Output/LastOutput.mp4")
     print("[INFO] Integration is Done")
