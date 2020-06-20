@@ -1,22 +1,13 @@
-
-
 # Colorify - Movie Colorization Application
 Colorization is the process of the addition of color to a black and white video or image. A grayscale image is a scalar but A colored image is a vector-valued function often represented as three separate channels. So, the colorization process requires mapping of a scalar to a vector (r,g,b) valued function which has no unique solution.
 Simply put, the mission of this project is to **Bring new life to old photos and movies**.
 ## Table of Contents  
-1.[How to Start ?](#how-to-run-the-project)
- - [Dependencies](#dependencies) 
- - [Run](#how-to-run-?)   
-
-2.[Shot transition detection](#shot-transition-detection)  
+1.[How to Start The Project?](#how-to-run-the-project)  
+2.[Shot transition detection](#shot-transition-detection)    
 3.[Model Architcture](#model-architcture)  
-- [Generator](#generator) 
-- [Discriminator](#discriminator) 
-
-
 4.[Color Propagation](#color-propagation)  
-5.[Results](#results)  
-6.[License](#License)  
+5.[Results](#results)    
+6.[License](#License)   
 
 ## How To Run The Project?
 ### Dependencies 
@@ -76,11 +67,9 @@ The L channel is going to by the current frame and propapagte a&b channel from t
 
 **Colorization of the Nature**
    
-> [![Nature](https://img.youtube.com/vi/K83whIRUq-g/0.jpg)](https://youtu.be/K83whIRUq-g)]
-
-**Colorization of Animals **    
-  
-> [![Animals](https://img.youtube.com/vi/hBtmg-5g4hM/0.jpg)](https://youtu.be/hBtmg-5g4hM)]
+> [![Nature](https://img.youtube.com/vi/K83whIRUq-g/0.jpg)](https://youtu.be/K83whIRUq-g)
+> 
+> [![Animals](https://img.youtube.com/vi/hBtmg-5g4hM/0.jpg)](https://youtu.be/hBtmg-5g4hM)
 >
 > [![Animals](https://img.youtube.com/vi/XJLXr4OUveE/0.jpg)](https://youtu.be/XJLXr4OUveE)
 ## License
