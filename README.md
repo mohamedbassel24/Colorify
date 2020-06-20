@@ -6,7 +6,7 @@ Simply put, the mission of this project is to **Bring new life to old photos and
 ## Table of Contents  
 1.[How to Start ?](#how-to-run-the-project)
  - [Dependencies](#dependencies) 
- - [Run](#how-to-run-? )   
+ - [Run](#how-to-run-?)   
 
 2.[Shot transition detection](#shot-transition-detection)  
 3.[Model Architcture](#model-architcture)  
@@ -81,7 +81,7 @@ The L channel is going to by the current frame and propapagte a&b channel from t
 **Colorization of Animals **    
   
 > [![Animals](https://img.youtube.com/vi/hBtmg-5g4hM/0.jpg)](https://youtu.be/hBtmg-5g4hM)]
-<hr>
+>
 > [![Animals](https://img.youtube.com/vi/XJLXr4OUveE/0.jpg)](https://youtu.be/XJLXr4OUveE)
 ## License
  **[MIT license](http://opensource.org/licenses/mit-license.php)**    
