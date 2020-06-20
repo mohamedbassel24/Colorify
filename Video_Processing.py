@@ -1,7 +1,5 @@
-import subprocess
 from commonfunctions import *
-import cv2 as cv
-import moviepy.editor
+from Colorization.GAN import colorization
 
 
 def getVideoFrames(FileName):
@@ -34,7 +32,7 @@ def WriteImage(image):
     print("[INFO] Image has been written...done")
 
 
-def getFrameShoots(frameList, Threshold, showSteps=False):
+def getFrameShoots(frameList, Threshold, showSteps=False, HistogramThreshold=60):
     """
     input:  Movie Frame List,The Threshold needed for cutting into shots
     output: frames for each shoot
@@ -51,12 +49,15 @@ def getFrameShoots(frameList, Threshold, showSteps=False):
         pixelDifference = np.sum(abs(rgb2gray(frameList[i + 1]) - rgb2gray(frameList[i])))
         # Normalization of SAD
         # pixelDifference /= TotalPixelNum
+
+        histogramDifference = getHistoDiff(rgb2gray(frameList[i]), rgb2gray(frameList[i + 1]))
         shootDet = abs(pixelDifference - preDifference)
         if showSteps:
-            print(pixelDifference, shootDet)
-        if shootDet > Threshold and len(shootFrames) > 45:  # avoid catching too many transition
+            print("Sad Threshold:", pixelDifference, shootDet, "HistogramThreshold", histogramDifference)
+        if shootDet > Threshold and len(
+                shootFrames) > 45 and (histogramDifference > HistogramThreshold):  # avoid catching too many transition
             if showSteps:
-                show_images([shootFrames[0], shootFrames[-1]], ["Start", "End"])
+                show_images([shootFrames[0][:, :, ::-1], shootFrames[-1][:, :, ::-1]], ["Start", "End"])
             shootList.append(shootFrames)
             # reset the shootFrames
             shootFrames = []
@@ -67,10 +68,18 @@ def getFrameShoots(frameList, Threshold, showSteps=False):
         shootFrames = []
 
     if len(shootFrames) != 0:
-        shootList.append(shootFrames)            # to append last frames after the last end of last shoot
-
+        shootList.append(shootFrames)  # to append last frames after the last end of last shoot
     print("[INFO] Shoot Detection .. done Total #Shots is ", len(shootList))
     return shootList
+
+
+def getHistoDiff(Frame, NextFrame, showSteps=False):
+    Frame = Frame.astype("uint8")
+    NextFrame = NextFrame.astype("uint8")
+    histCurr = cv2.calcHist([Frame], [0], None, [256], [0, 256])
+    histNext = cv2.calcHist([NextFrame], [0], None, [256], [0, 256])
+    Diff = np.sum(abs(histCurr - histNext))
+    return Diff
 
 
 def getKeyFrame(rShoot):
@@ -90,7 +99,48 @@ def getKeyFrame(rShoot):
         if len(contours_gk) > MaxContourNumber:
             KeyFrame = rShoot[i]
             indexKeyFrame = i
+            MaxContourNumber = len(contours_gk)
     print("INFO : get KeyFrame in shoot is Done .. ")
+    return KeyFrame, indexKeyFrame
+
+
+def getKeyFrame(rShoot, genModel, Type=0):
+    """
+        input:  Frame shoots , generator model ,
+        type 0=> get the frame with the maximum number of contour in
+        type 1 => get the frame with the maximum colorized pixels
+        output: the MI Frame : contains most of the colors
+        function: return the maximum frame with contours
+    """
+    maxNum_pixelColorized = 0
+    KeyFrame = rShoot[0]
+    indexKeyFrame = 0
+    if Type:
+        for i in range(len(rShoot)):
+            # Colorize the frame
+            ColorizedFrame = colorization(rShoot[i], genModel)
+            # Convert from rgb to lab
+            lab_Frame = color.rgb2lab(ColorizedFrame)
+            # Count the a & b channels
+            CurrentColorizedPixelSum = np.sum(lab_Frame[:, :, 1] != 0) + np.sum(lab_Frame[:, :, 2] != 0)
+            if CurrentColorizedPixelSum > maxNum_pixelColorized:
+                KeyFrame = rShoot[i]
+                indexKeyFrame = i
+                maxNum_pixelColorized = CurrentColorizedPixelSum
+    else:
+        MaxContourNumber = 0
+        KeyFrame = rShoot[0]
+        indexKeyFrame = 0
+        for i in range(len(rShoot)):
+            gk = (rgb2gray(rShoot[i]) * 255).astype("uint8")
+            _, gk = cv2.threshold(gk, 200, 255, cv2.THRESH_BINARY)
+            # Get Image Contours
+            _,contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+            if len(contours_gk) > MaxContourNumber:
+                KeyFrame = rShoot[i]
+                indexKeyFrame = i
+                MaxContourNumber = len(contours_gk)
+    print("[INFO] : get KeyFrame in shoot is Done .. ")
     return KeyFrame, indexKeyFrame
 
 
@@ -141,3 +191,11 @@ def IntegrateAudio(Videopath, MovieName):
     # Write the output
     final_clip.write_videofile("Input_and_Output/LastOutput.mp4")
     print("[INFO] Integration is Done")
+def Video2Gray(FrameList):
+    height, width, layers = FrameList[0].shape
+    size = (width, height)
+    out = cv2.VideoWriter("GrayScale" + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 24, size)
+    for i in range(len(FrameList)):
+        FrameList[i] = cv2.cvtColor(FrameList[i], cv2.COLOR_BGR2GRAY)
+        out.write(FrameList[i])
+    out.release()

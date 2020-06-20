@@ -1,6 +1,4 @@
 from commonfunctions import *
-from skimage import io, color
-from scipy import stats
 from Video_Processing import WriteFrames
 
 
@@ -75,7 +73,6 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
     # Create a map to track each pixel
     PixelMap = np.zeros((ik_pre.shape[0], ik_pre.shape[1]))
     # Convert to Binary Image
-
     gk = (rgb2gray(gk) * 255).astype("uint8")
     gk_prev = (rgb2gray(gk_prev) * 255).astype("uint8")
     GlobalThresh = 200
@@ -90,8 +87,8 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
     if ShowSteps:
         show_images([gk, gk_prev])
     # Get Image Contours
-    contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
-    contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
+    _, contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+    _, contours_gk_pre, _ = cv2.findContours(gk_prev, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for previous frame
 
     # Match Contours
 
@@ -179,7 +176,7 @@ def ContourPropagation(gk, gk_prev, ik_pre, ShowSteps=False, BinaryThreshold=103
 
     ik = color.lab2rgb(ik)
     ik = (ik * 255).astype("uint8")
-
+    # Back to original Size
     ik = cv2.resize(ik, (originalShape[1], originalShape[0]), interpolation=cv2.INTER_AREA)
     #   ik = color.rgb2lab(ik)
     #  ik = ik.astype("float64")
@@ -214,8 +211,9 @@ def ColorPropagation_ShootFrames(shootFrames, keyFrame, indexKeyFrame, ShootNum)
             # avoid colorizing this frame
             ColorizedFrameList.append(Gk)
             continue
+        # append in the colorized list
         ColorizedFrameList.append(ContourPropagation(Gk, Gk_1, Ik_1))
-        # show_images([ColorizedFrameList[-1], frame], ["Colorized", "Original"])
+        # Write the frame for debugging purposes
         WriteFrames(i, ColorizedFrameList[-1], ShootNum + 1)
     # Backward Propagation from index frame to the start of the frame list
     for i in range(indexKeyFrame - 1, 0, -1):
@@ -232,7 +230,138 @@ def ColorPropagation_ShootFrames(shootFrames, keyFrame, indexKeyFrame, ShootNum)
             # avoid colorizing this frame
             ColorizedFrameList.append(Gk)
             continue
+        # Insert in the colorized list from beginning
         ColorizedFrameList.insert(0, ContourPropagation(Gk, Gk_1, Ik_1))  # insert at beginning
+        # Write the frame for debugging purposes
         WriteFrames(i, ColorizedFrameList[0], ShootNum + 1)
     print("[INFO] Color Propagation in shoot# ", ShootNum + 1, "is done...")
     return ColorizedFrameList
+
+
+def interactiveColorization(Position, Color, Frame):
+    """
+    input:
+            User Pixel Location [Row,Col]
+            color of colorized contour [R,G,B]
+            Frame to be colorized
+    output: contour at this position is colorized with this color
+    """
+
+    # Convert RGB to LAB color model
+    lab_Frame = color.rgb2lab(Frame)
+    # Convert to Binary Image
+    gk = (rgb2gray(Frame) * 255).astype("uint8")
+    # GlobalThresh = 200
+
+    # gray = cv2.bilateralFilter(gk, 11, 17, 17)
+    # gk = cv2.Canny(gray, 30, 150)
+    # gk = cv2.dilate(gk, None, iterations=2)
+    # gk = cv2.erode(gk, None, iterations=2)
+
+    GlobalThresh = threshold_otsu(gk)
+    # Convert Image to Binary
+    _, gk = cv2.threshold(gk, GlobalThresh, 255, cv2.THRESH_BINARY)
+    gk = cv2.dilate(gk, None, iterations=10)
+    gk = cv2.erode(gk, None, iterations=10)
+    # Get Image Contours
+    _, contours_gk, _ = cv2.findContours(gk, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # for current frame
+    show_images([gk])
+    minDist = 1000  # Max Constant value
+    MostMatchedContour = contours_gk[0]
+    for cnt_gk in contours_gk:
+        dist = cv2.pointPolygonTest(cnt_gk, Position, True)  # check if the point inside contour or not
+        if minDist > dist >= 0:
+            minDist = dist
+            MostMatchedContour = cnt_gk
+
+    if minDist != 1000:
+        gk_pointsCnt = getContourPoints(gk, MostMatchedContour)  # points from current frame
+        lab_Frame[gk_pointsCnt[0], gk_pointsCnt[1], 1] = Color[0]
+        lab_Frame[gk_pointsCnt[0], gk_pointsCnt[1], 2] = Color[1]
+    else:
+        print("[INFO] No object Found with this location , tune pixel location")
+    # Convert to RGB color model
+    ik = color.lab2rgb(lab_Frame)
+    ik = (ik * 255).astype("uint8")
+    show_images([Frame, ik])
+    return ik
+
+
+def rgb2lab(inputColor):
+    num = 0
+    RGB = [0, 0, 0]
+
+    for value in inputColor:
+        value = float(value) / 255
+
+        if value > 0.04045:
+            value = ((value + 0.055) / 1.055) ** 2.4
+        else:
+            value = value / 12.92
+
+        RGB[num] = value * 100
+        num = num + 1
+
+    XYZ = [0, 0, 0, ]
+
+    X = RGB[0] * 0.4124 + RGB[1] * 0.3576 + RGB[2] * 0.1805
+    Y = RGB[0] * 0.2126 + RGB[1] * 0.7152 + RGB[2] * 0.0722
+    Z = RGB[0] * 0.0193 + RGB[1] * 0.1192 + RGB[2] * 0.9505
+    XYZ[0] = round(X, 4)
+    XYZ[1] = round(Y, 4)
+    XYZ[2] = round(Z, 4)
+
+    # Observer= 2°, Illuminant= D65
+    XYZ[0] = float(XYZ[0]) / 95.047  # ref_X =  95.047
+    XYZ[1] = float(XYZ[1]) / 100.0  # ref_Y = 100.000
+    XYZ[2] = float(XYZ[2]) / 108.883  # ref_Z = 108.883
+
+    num = 0
+    for value in XYZ:
+
+        if value > 0.008856:
+            value = value ** (0.3333333333333333)
+        else:
+            value = (7.787 * value) + (16 / 116)
+
+        XYZ[num] = value
+        num = num + 1
+
+    Lab = [0, 0, 0]
+
+    L = (116 * XYZ[1]) - 16
+    a = 500 * (XYZ[0] - XYZ[1])
+    b = 200 * (XYZ[1] - XYZ[2])
+
+    Lab[0] = round(L, 4)
+    Lab[1] = round(a, 4)
+    Lab[2] = round(b, 4)
+
+    return Lab
+
+
+def Interactive(img):
+    choice = input("[INFO] Do you want to use interactive colorization?y/n \n")
+    while choice == 'y':
+        #  gk = (rgb2gray(img) * 255).astype("uint8")
+        # GlobalThresh = threshold_otsu(gk)
+        # Convert Image to Binary
+        # _, gk = cv2.threshold(gk, GlobalThresh, 255, cv2.THRESH_BINARY)
+        # gk = cv2.erode(gk, None, iterations=2)
+        # gk = cv2.dilate(gk, None, iterations=2)
+
+        # gk = cv2.erode(gk, None, iterations=10)
+        # gk = cv2.dilate(gk, None, iterations=10)
+
+        # print("Choose the White \n")
+        # show_images([gk])
+        row = int(input("[INFO] Enter pixel row position \n"))
+        col = int(input("[INFO] Enter pixel col position \n"))
+        R = int(input("[INFO] Enter color r component\n"))
+        G = int(input("[INFO] Enter color g component \n"))
+        B = int(input("[INFO] Enter color b component \n"))
+        img = interactiveColorization((row, col), rgb2lab([R, G, B])[1:], img)
+        choice = input("[INFO] Do you want to Enter another point ?y/n \n")
+        if choice != 'y':
+            break
+    return img
