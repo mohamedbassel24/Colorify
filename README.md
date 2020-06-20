@@ -73,14 +73,15 @@ The first step was converting the images from their standard RGB color channels 
 The L channel is going to by the current frame and propapagte a&b channel from the previous colorized frame.
 
 ## Results
-####Colorization of the Nature
-[![Alt text](https://img.youtube.com/vi/K83whIRUq-g/0.jpg)](https://youtu.be/K83whIRUq-g)
 
-####Colorization  of Animals 
-[![Alt text](https://img.youtube.com/vi/hBtmg-5g4hM/0.jpg)](https://youtu.be/hBtmg-5g4hM)
+**Colorization of the Nature**
+   
+> [![Nature](https://img.youtube.com/vi/K83whIRUq-g/0.jpg)](https://youtu.be/K83whIRUq-g)]
+
+**Colorization of Animals **    
+  
+> [![Animals](https://img.youtube.com/vi/hBtmg-5g4hM/0.jpg)](https://youtu.be/hBtmg-5g4hM)]
 <hr>
-
-[![Alt text](https://img.youtube.com/vi/XJLXr4OUveE/0.jpg)](https://youtu.be/XJLXr4OUveE)
-
+> [![Animals](https://img.youtube.com/vi/XJLXr4OUveE/0.jpg)](https://youtu.be/XJLXr4OUveE)
 ## License
  **[MIT license](http://opensource.org/licenses/mit-license.php)**    
