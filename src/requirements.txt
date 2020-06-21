@@ -1,0 +1,6 @@
+setuptools==41.0.0
+tensorflow
+keras
+moviepy
+scikit-image
+matplotlib
