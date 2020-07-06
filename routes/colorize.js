@@ -24,15 +24,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post('/', upload.single('image'), (req, res, next) => {
-
+    // const contents = fs.readFileSync('model/Input_and_Output/3.mp4' , {
+    //     encoding: 'base64'
+    // });
+    // res.send(contents)
     // console.log('works3')
     // res.send('1')
 
     // console.log('works4')
     // const contents = fs.readFileSync('public/black.jpg', { encoding: 'base64' });
-
-
     // console.log('works5')
+
     let re = /(?:\.([^.]+))?$/;
     let ext = re.exec(req.body.name)[1];
 
@@ -46,14 +48,25 @@ router.post('/', upload.single('image'), (req, res, next) => {
     exec(cmd, (err, stdout, stderr) => {
         if (err) {
             // node couldn't execute the command
+            console.log(stderr)
+            console.log(err)
             return;
         }
-        const contents = fs.readFileSync('model/Input_and_Output/ColorizedImage.png' , {
-            encoding: 'base64'
-        });
+        let contents = 0
+        if(type == 1)
+        {
+            contents = fs.readFileSync('model/Input_and_Output/LastOutput.mp4' , {
+                encoding: 'base64'
+            });
+        }
+        else{
+            contents = fs.readFileSync('model/Input_and_Output/ColorizedImage.png' , {
+                encoding: 'base64'
+            });
+        }
 
 
-        exec('rm model/Input_and_Output/*', (err, stdout, stderr) => {
+        exec('rm -r model/Input_and_Output/*', (err, stdout, stderr) => {
 
             res.send(contents)
         })

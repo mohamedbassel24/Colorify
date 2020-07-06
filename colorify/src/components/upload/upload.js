@@ -26,8 +26,24 @@ class Upload extends Component{
             file2:e.target.files[0]
         })
 
-        let ImagePreview = document.getElementById('image-preview')
-        ImagePreview.style.display= 'block'
+        let radios = document.getElementsByName('type');
+        let type = 1
+        for (let i = 0, length = radios.length; i < length; i++) {
+            if (radios[i].checked) {
+                type =  radios[i].value
+                break;
+            }
+        }
+        if(type == 0 )
+        {
+            let ImagePreview = document.getElementById('image-preview')
+            ImagePreview.style.display= 'block'
+        }
+        else{
+            let VideoPreview = document.getElementById('video-preview')
+            VideoPreview    .style.display= 'block'
+        }
+        
         let ColorizeButton = document.getElementById('colorize-button')
         ColorizeButton.style.display= 'inline'
         let CancelButton = document.getElementById('cancel-button')
@@ -113,11 +129,22 @@ class Upload extends Component{
                 color: res.data,
                 black: OriginalImage
             }) 
-            let Result= document.getElementById('black-color-images')
-            Result.style.display = 'inline'
+
+            if (type == 0)
+            {
+                let Result= document.getElementById('black-color-images')
+                Result.style.display = 'inline'
+                
+            }
+            else{
+                let Result= document.getElementById('black-color-videos')
+                Result.style.display = 'inline'
             
+            }
+
             let TryButton = document.getElementById('try-button')
             TryButton.style.display= 'inline'
+            
 
         })
         .catch((err)=>{
@@ -142,6 +169,11 @@ class Upload extends Component{
                             </div>
                             <div id = "upload-content">
                                 <img src={this.state.file} style={{display:'none'}} id="image-preview"/>
+
+                                <video width="320" height="240" style={{display:'none'}} id="video-preview" controls>
+                                    <source src={this.state.file} type="video/mp4"  id="video-preview-src" />
+                                </video>
+                                
                                 <div className="model">
                                     {/* <p>You want to colorize:</p> */}
                                     <input type="radio" id="human" name="model" value="0" />
@@ -164,6 +196,11 @@ class Upload extends Component{
                                 {/* <img src={this.state.black}  id="image-black"/> */}
                                 <img src={`data:image/png;base64,${this.state.color}`}  id="image-color"/>
 
+                            </div>
+                            <div id = 'black-color-videos' style={{display:'none'}}>
+                                {/* <img src={this.state.black}  id="image-black"/> */}
+                                  <embed type="video/mp4" src={`data:video/mp4;base64,${this.state.color}`}  />
+    
                             </div>
                         </div>
                         
