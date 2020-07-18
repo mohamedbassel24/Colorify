@@ -17,3 +17,4 @@ model/pts_in_hull.npy
 Colorization/Human Dataset Notebook/kaggle/vgg16_weights_tf_dim_ordering_tf_kernels.h5
 
 *.mp4
+node_modules
