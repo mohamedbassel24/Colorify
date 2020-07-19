@@ -181,13 +181,18 @@ def IntegrateAudio(Videopath, MovieName):
     video = moviepy.editor.VideoFileClip(Videopath)
     audio = video.audio
     # Create the audio file
-    audio.write_audiofile("Input_and_Output/sample.mp3")
+    if audio:
+        audio.write_audiofile("Input_and_Output/sample.mp3")
     # Read Colorized Video
     my_clip = moviepy.editor.VideoFileClip(MovieName + ".avi")
     # Read audio of B&W
-    final_audio = moviepy.editor.AudioFileClip('Input_and_Output/sample.mp3')
-    # Integrate both of them
-    final_clip = my_clip.set_audio(final_audio)
+    if audio:
+        final_audio = moviepy.editor.AudioFileClip('Input_and_Output/sample.mp3')
+        # Integrate both of them
+        final_clip = my_clip.set_audio(final_audio)
+    else:
+        final_clip = my_clip
+        
     # Write the output
     final_clip.write_videofile("Input_and_Output/LastOutput.mp4")
     print("[INFO] Integration is Done")

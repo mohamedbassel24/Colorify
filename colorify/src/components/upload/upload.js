@@ -62,13 +62,28 @@ class Upload extends Component{
         this.setState({
             file:null
         })
+        this.setState({
+            color: null,
+            black: null
+        }) 
 
         let ImagePreview = document.getElementById('image-preview')
         ImagePreview.style.display= 'none'
         let Result= document.getElementById('black-color-images')
         Result.style.display = 'none'
+
+        let VideoPreview = document.getElementById('video-preview')
+        VideoPreview.style.display= 'none'
+        let VResult= document.getElementById('black-color-videos')
+        VResult.style.display = 'none'
+
+        let VideoEmbed= document.getElementById('video-embed')
+        VideoEmbed.remove()
+
         let TryButton = document.getElementById('try-button')
         TryButton.style.display= 'none'
+
+
     }
     Colorize(e){
         let UploadContent = document.getElementById('upload-content')
@@ -139,6 +154,11 @@ class Upload extends Component{
             else{
                 let Result= document.getElementById('black-color-videos')
                 Result.style.display = 'inline'
+                let VEmbed = document.createElement("EMBED")
+                VEmbed.src = `data:video/mp4;base64,${this.state.color}`
+                VEmbed.type ="video/mp4"
+                VEmbed.id = "video-embed"
+                Result.appendChild(VEmbed)
             
             }
 
@@ -198,9 +218,7 @@ class Upload extends Component{
 
                             </div>
                             <div id = 'black-color-videos' style={{display:'none'}}>
-                                {/* <img src={this.state.black}  id="image-black"/> */}
-                                  <embed type="video/mp4" src={`data:video/mp4;base64,${this.state.color}`}  />
-    
+        
                             </div>
                         </div>
                         
