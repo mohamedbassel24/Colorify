@@ -18,3 +18,10 @@ Colorization/Human Dataset Notebook/kaggle/vgg16_weights_tf_dim_ordering_tf_kern
 
 *.mp4
 node_modules
+Color_Propagation/__pycache__/
+
+Input_and_Output/
+venv/
+Colorization/__pycache__/
+
+__pycache__/
