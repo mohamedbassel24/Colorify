@@ -17,7 +17,7 @@ class Header extends Component{
                 <div className = 'header-bar' >    
                     <div className="logo">
                         <img src={this.state.logo}/>
-                        <p>ColorIT</p>
+                        <p>Colorify</p>
                     </div>
                     <div className="nav-menu">
                         <ul>
