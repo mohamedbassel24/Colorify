@@ -43,7 +43,8 @@ router.post('/', upload.single('image'), (req, res, next) => {
 
     type = req.body.type
     model = req.body.model 
-    const cmd = 'cd model && python3 main.py '+ type +' ' + model + ' black.' + ext 
+    const cmd = 'cd model && rm stream/* && python3 main.py '+ type +' ' + model + ' black.' + ext 
+    // const cmd = 'ls'
     console.log(cmd)
     exec(cmd, (err, stdout, stderr) => {
         if (err) {
@@ -55,9 +56,9 @@ router.post('/', upload.single('image'), (req, res, next) => {
         let contents = 0
         if(type == 1)
         {
-            contents = fs.readFileSync('model/Input_and_Output/LastOutput.mp4' , {
-                encoding: 'base64'
-            });
+            
+                contents = 'http://localhost:9000/stream/LastOutput.mp4'
+          
         }
         else{
             contents = fs.readFileSync('model/Input_and_Output/ColorizedImage.png' , {
@@ -66,7 +67,7 @@ router.post('/', upload.single('image'), (req, res, next) => {
         }
 
 
-        exec('rm -r model/Input_and_Output/*', (err, stdout, stderr) => {
+        exec('rm model/Input_and_Output/*', (err, stdout, stderr) => {
 
             res.send(contents)
         })

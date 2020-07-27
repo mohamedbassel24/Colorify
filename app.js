@@ -26,16 +26,17 @@ app.use(express.json());
 app.use(cors())
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'model')));
 
 
 
 // app.use('/', indexRouter);
 app.use('/colorize', colorizeRouter)
     // app.use('/users', usersRouter);
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '/colorify/build/index.html'));
-});
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname + '/colorify/build/index.html'));
+//     // res.sendFile(path.join(__dirname + '/model/Input_and_Output/a.mp4'));
+// });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

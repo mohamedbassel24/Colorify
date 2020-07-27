@@ -194,7 +194,7 @@ def IntegrateAudio(Videopath, MovieName):
         final_clip = my_clip
         
     # Write the output
-    final_clip.write_videofile("Input_and_Output/LastOutput.mp4")
+    final_clip.write_videofile("stream/LastOutput.mp4")
     print("[INFO] Integration is Done")
 def Video2Gray(FrameList):
     height, width, layers = FrameList[0].shape

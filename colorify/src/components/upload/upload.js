@@ -77,8 +77,8 @@ class Upload extends Component{
         let VResult= document.getElementById('black-color-videos')
         VResult.style.display = 'none'
 
-        let VideoEmbed= document.getElementById('video-embed')
-        VideoEmbed.remove()
+        // let VideoEmbed= document.getElementById('video-embed')
+        // VideoEmbed.remove()
 
         let TryButton = document.getElementById('try-button')
         TryButton.style.display= 'none'
@@ -152,13 +152,16 @@ class Upload extends Component{
                 
             }
             else{
+                
                 let Result= document.getElementById('black-color-videos')
                 Result.style.display = 'inline'
-                let VEmbed = document.createElement("EMBED")
-                VEmbed.src = `data:video/mp4;base64,${this.state.color}`
-                VEmbed.type ="video/mp4"
-                VEmbed.id = "video-embed"
-                Result.appendChild(VEmbed)
+                // let VEmbed = document.createElement("video")
+                // // VEmbed.src = `data:video/mp4;base64,${this.state.color}`
+
+                // VEmbed.src = `${this.state.color}`
+                // // VEmbed.type ="video/mp4"
+                // VEmbed.id = "video-embed"
+                // Result.appendChild(VEmbed)
             
             }
 
@@ -218,7 +221,10 @@ class Upload extends Component{
 
                             </div>
                             <div id = 'black-color-videos' style={{display:'none'}}>
-        
+                            {/* <video width="320" height="240" controls>
+                                <source src={this.state.color} type="video/mp4"/>
+                            </video> */}
+                            <a href={this.state.color} download>Download colorized video</a>
                             </div>
                         </div>
                         

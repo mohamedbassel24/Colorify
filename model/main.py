@@ -18,7 +18,8 @@ else:
 if VideoMode:
     # load movie Frames
     FrameList = getVideoFrames(videoPath)
-    # List Contain movie frames after colorization
+    # List Contain movie frames after colorizationFailed to load resource: the server responded with a status of 403 ()
+
     ColorizedFrameList = []
     if not ColorizationByFrame:
         # cut the movie into shoots
